@@ -1,8 +1,10 @@
+
 # Ignorar la carpeta venv
 venv/
 
 # Ignorar la carpeta .vscode
 .vscode/
+
 
 # Ignorar el archivo .env
 .env
