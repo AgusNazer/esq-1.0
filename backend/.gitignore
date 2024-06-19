@@ -1,5 +1,11 @@
+# Ignorar la carpeta venv
+venv/
 
-venv
-pg local.session.sql
-.vscode
+# Ignorar la carpeta .vscode
+.vscode/
+
+# Ignorar el archivo .env
 .env
+
+# Ignorar el archivo pg local.session.sql
+pg\ local.session.sql
