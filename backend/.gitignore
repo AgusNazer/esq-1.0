@@ -1,1 +1,3 @@
 venv/
+pg local.session.sql
+.vscode
