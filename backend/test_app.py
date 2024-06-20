@@ -1,4 +1,4 @@
-# En tu archivo de pruebas (por ejemplo, test_app.py)
+# tests para app y connections.
 from app import app
 from config_db import engine, SessionLocal
 from sqlalchemy.orm import sessionmaker

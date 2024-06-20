@@ -1,5 +1,4 @@
 from flask import Flask
-# from flask import Blueprint, request, jsonify
 from src.routes.user import users
 from config_db import engine
 from src.models.user import Base

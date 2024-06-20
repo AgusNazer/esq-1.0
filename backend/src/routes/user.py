@@ -37,7 +37,7 @@ def create_user():
     
     username = data['username']
     email = data['email']
-    password = data['password']  # Asegúrate de encriptar la contraseña en un caso real
+    password = data['password']  # argegar JWT
     
     db = next(get_db())
     try:
@@ -50,6 +50,3 @@ def create_user():
     except Exception as e:
         db.rollback()
         return jsonify({"error": "Failed to create user", "details": str(e)}), 500
-
-# Nota: Este archivo asume que tienes una tabla 'users' en tu base de datos PostgreSQL
-# con columnas 'username', 'email' y 'password' para almacenar la información del usuario
