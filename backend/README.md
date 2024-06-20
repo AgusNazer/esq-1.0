@@ -1,1 +1,1 @@
-Welcome to esq business gestion
+Applicacion de gestion
