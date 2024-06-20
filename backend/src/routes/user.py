@@ -1,19 +1,26 @@
 from flask import Blueprint, request, jsonify
-import psycopg2
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# Obtener las variables de entorno
-DB_USER = os.getenv('DB_USER')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
-DB_NAME = os.getenv('DB_NAME')
-
+from sqlalchemy.orm import Session
+from src.models.user import User
+from config_db import SessionLocal
 
 users = Blueprint('users', __name__)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@users.route('/get_all_users', methods=['GET'])
+def get_all_users():
+    db = next(get_db())
+    users = db.query(User).all()
+    users_list = [{"id": user.id, "username": user.username, "email": user.email} for user in users]
+    return jsonify(users_list), 200
+    
+ 
 
 @users.route('/create_user', methods=['POST'])
 def create_user():
@@ -22,7 +29,7 @@ def create_user():
     
     data = request.get_json()
    
-    #Validar datos de entrada
+    # Validar datos de entrada
     required_fields = ['username', 'email', 'password']
     for field in required_fields:
         if field not in data:
@@ -32,35 +39,17 @@ def create_user():
     email = data['email']
     password = data['password']  # Asegúrate de encriptar la contraseña en un caso real
     
-     # Asegúrate de encriptar la contraseña en un caso real
-
-    # Aquí es donde agregarías la lógica para guardar el usuario en la base de datos
-
-   # Conectar a PostgreSQL
+    db = next(get_db())
     try:
-        connect = psycopg2.connect(
-            host=DB_HOST,
-            port=DB_PORT,
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD
-        )
-        print("Conexión exitosa")
-        
-        cur = connect.cursor()
-        
-        # Insertar el usuario en la base de datos
-        cur.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", (username, email, password))
-        connect.commit()
-        
-        cur.close()
-        connect.close()
-
+        new_user = User(username=username, email=email, password=password)
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
         return jsonify({"message": "User created successfully"}), 201
 
     except Exception as e:
-        print(f"Error en la conexión: {e}")
-        return jsonify({"error": "Failed to create user"}), 500
+        db.rollback()
+        return jsonify({"error": "Failed to create user", "details": str(e)}), 500
 
 # Nota: Este archivo asume que tienes una tabla 'users' en tu base de datos PostgreSQL
 # con columnas 'username', 'email' y 'password' para almacenar la información del usuario
