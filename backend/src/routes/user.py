@@ -50,3 +50,53 @@ def create_user():
     except Exception as e:
         db.rollback()
         return jsonify({"error": "Failed to create user", "details": str(e)}), 500
+
+@users.route('/delete_user/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    if request.headers['Content-Type'] != 'application/json':
+        return jsonify({"error": "Unsupported Media Type"}), 415
+
+    db = next(get_db())
+    try:
+        user_to_delete = db.query(User).filter_by(id=user_id).first()
+        
+        if user_to_delete is None:
+            return jsonify({"error": "User not found"}), 404
+        
+        db.delete(user_to_delete)
+        db.commit()
+        return jsonify({"message": "User deleted successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": "Failed to delete user", "details": str(e)}), 500
+    
+    
+@users.route('/update_user/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    if request.headers['Content-Type'] != 'application/json':
+        return jsonify({"error": "Unsupported Media Type"}), 415
+    data = request.json
+    
+    db = next(get_db())
+    try:
+        user_to_update = db.query(User).filter_by(id=user_id).first()
+        
+        if user_to_update is None:
+            return jsonify({"error": "User not found"}), 404
+
+        # Update the user's fields
+        if 'username' in data:
+            user_to_update.username = data['username']
+        if 'email' in data:
+            user_to_update.email = data['email']
+        if 'password' in data:
+            user_to_update.password = data['password']
+        # Add other fields as necessary
+        
+        db.commit()
+        return jsonify({"message": "User updated successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": "Failed to update user", "details": str(e)}), 500

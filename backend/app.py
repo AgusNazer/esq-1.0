@@ -10,6 +10,7 @@ app.register_blueprint(users, url_prefix='/users')
 Base.metadata.create_all(bind=engine)
 
 
+
 @app.route('/')
 def hello_world():
     return 'Hello, World'
