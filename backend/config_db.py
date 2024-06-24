@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import psycopg2
+# import psycopg2
 
 load_dotenv()
 
@@ -24,4 +24,4 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Esta línea no es necesaria ya que SQLAlchemy se encarga de la conexión
-# print("Conexión a la base de datos exitosa")
+print("Conexión a la base de datos exitosa")
