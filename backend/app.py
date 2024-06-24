@@ -2,7 +2,6 @@ from flask import Flask
 from src.routes.user import users
 from config_db import engine
 from src.models.user import Base
-import os
 
 app = Flask(__name__)
 
