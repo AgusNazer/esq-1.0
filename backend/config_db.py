@@ -8,16 +8,20 @@ import psycopg2
 load_dotenv()
 
 # Obtener las variables de entorno
-DB_USER = os.getenv('DB_USER')
-DB_PASSWORD= os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
-DB_NAME = os.getenv('DB_NAME')
+# DB_USER = os.getenv('DB_USER')
+# DB_PASSWORD= os.getenv('DB_PASSWORD')
+# DB_HOST = os.getenv('DB_HOST')
+# DB_PORT = os.getenv('DB_PORT')
+# DB_NAME = os.getenv('DB_NAME')
 
-# Crear la cadena de conexión
+# # Crear la cadena de conexión
 # DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 DATABASE_URL = "postgresql://postgres:Alma2022@localhost:5432/esq1.0"
-
+# print(f"DB_USER: {DB_USER}")
+# print(f"DB_PASSWORD: {DB_PASSWORD}")
+# print(f"DB_HOST: {DB_HOST}")
+# print(f"DB_PORT: {DB_PORT}")
+# print(f"DB_NAME: {DB_NAME}")
 
 engine = create_engine(DATABASE_URL)
 
