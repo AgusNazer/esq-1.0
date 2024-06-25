@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-# import psycopg2
+import psycopg2
 
 load_dotenv()
 
@@ -19,6 +19,7 @@ DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NA
 # DATABASE_URL = "postgresql://postgresqlesq_user:SSextFcn6tNv4n3KVagpUN2MSNitaX3M@dpg-cpsd3tt6l47c73e3jr00-a.oregon-postgres.render.com/postgresqlesq"
 # Crear el motor de la base de datos
 engine = create_engine(DATABASE_URL)
+print(DB_HOST)
 
 # Crear una sesión
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
