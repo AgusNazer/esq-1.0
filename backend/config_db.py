@@ -15,8 +15,8 @@ DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 
 # Crear la cadena de conexión
-# DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-DATABASE_URL = "postgresql://postgres:Alma2022@localhost:5432/esq1.0"
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# DATABASE_URL = "postgresql://postgres:Alma2022@localhost:5432/esq1.0"
 
 # Crear el motor de la base de datos
 engine = create_engine(DATABASE_URL)
