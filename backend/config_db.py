@@ -14,12 +14,15 @@ from sqlalchemy.orm import sessionmaker
 # DB_PORT = os.getenv('DB_PORT')
 # DB_NAME = os.getenv('DB_NAME')
 
-# Crear la cadena de conexión
+# pgadmin
 # DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-DATABASE_URL = "postgresql://postgres:Alma2022@localhost:5432/esq1.0"
+# DATABASE_URL = "postgresql://postgres:Alma2022@localhost:5432/esq1.0"
+
+#railway
+# DATABASE_URL = "postgresql://postgres:UCbiHCvSGRjoHXmRoEvUalgZaDkfsZFP@monorail.proxy.rlwy.net:41765/railway"
 
 #render postgre
-# DATABASE_URL = f"postgresql://esq1_0_user:PydlM33zqjJW9KHNd93A2XqN61aUIlxu@dpg-cptl40d2ng1s73e2sc80-a.oregon-postgres.render.com/esq1_0"
+DATABASE_URL = "postgresql://esq1_0_user:PydlM33zqjJW9KHNd93A2XqN61aUIlxu@dpg-cptl40d2ng1s73e2sc80-a.oregon-postgres.render.com/esq1_0"
 
 engine = create_engine(DATABASE_URL)
 
