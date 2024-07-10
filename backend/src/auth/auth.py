@@ -1,11 +1,20 @@
 # src/auth/auth.py
 from flask import Blueprint, jsonify, request, make_response, render_template, session, current_app, redirect, url_for
+from sqlalchemy.exc import IntegrityError
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
+from src.models.user import User
+#Alchemy
+from config_db import SessionLocal  # Importa la sesión de SQLAlchemy
+
+#hash security
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 auth = Blueprint('auth', __name__)
 
+# Middleware para verificar el token
 def token_required(func):
     @wraps(func)
     def decorated(*args, **kwargs):
@@ -21,18 +30,69 @@ def token_required(func):
         return func(*args, **kwargs)
     return decorated
 
+# Función para guardar un usuario en la base de datos
+def save_user(username, email, password):
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    new_user = User(username=username, email=email, password=hashed_password)
+    session = SessionLocal()
+    try:
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+        return new_user
+    except IntegrityError:
+        session.rollback()
+        raise ValueError("Username or email already exists")
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
+
+@auth.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+    
+    if not username or not email or not password:
+        return jsonify({'error': 'Username, email, and password are required'}), 400
+    
+    try:
+        user = save_user(username, email, password)
+        return jsonify({'message': 'User registered successfully', 'username': user.username, 'password':user.password}), 201
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
+    except Exception as e:
+        return jsonify({'error': 'Failed to register user', 'details': str(e)}), 500
+
 @auth.route('/login', methods=['POST'])
 def login():
-    if request.form['username'] and request.form['password'] == '123456':
-        session['logged_in'] = True
-        token = jwt.encode({
-            'user': request.form['username'],
-            'expiration': str(datetime.utcnow() + timedelta(seconds=120))
-        }, current_app.config['SECRET_KEY'], algorithm="HS256")
-        return jsonify({'token': token})
-    else:
-        return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm="Authentication Failed!"'})
-         
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
+
+    # Buscar al usuario por nombre de usuario
+    session = SessionLocal()
+    try:
+        user = session.query(User).filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            token = jwt.encode({
+                'user': user.username,
+                'exp': datetime.utcnow() + timedelta(seconds=120)  # Expira en 2 minutos
+            }, current_app.config['SECRET_KEY'], algorithm="HS256")
+            session.close()
+            return jsonify({'token': token}), 200
+        else:
+            session.close()
+            return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm="Authentication Failed!"'})
+    except Exception as e:
+        session.close()
+        return jsonify({'error': 'Failed to authenticate', 'details': str(e)}), 500
+
 @auth.route('/logout')
 def logout():
     session.pop('logged_in', None)
