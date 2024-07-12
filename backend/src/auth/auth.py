@@ -30,6 +30,14 @@ def token_required(func):
         return func(*args, **kwargs)
     return decorated
 
+# Función para verificar la existencia de un usuario
+def get_user_by_username_or_email(username, email):
+    session = SessionLocal()
+    try:
+        return session.query(User).filter((User.username == username) | (User.email == email)).first()
+    finally:
+        session.close()
+
 # Función para guardar un usuario en la base de datos
 def save_user(username, email, password):
     hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
@@ -58,14 +66,21 @@ def register():
     
     if not username or not email or not password:
         return jsonify({'error': 'Username, email, and password are required'}), 400
+        
     
     try:
+        #checkear usuario existente
+        existing_user = get_user_by_username_or_email(username, email)
+        if existing_user:
+            return jsonify({'message': 'User or email already exists'}), 400
+        
         user = save_user(username, email, password)
         return jsonify({'message': 'User registered successfully', 'username': user.username, 'password':user.password}), 201
     except ValueError as ve:
         return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': 'Failed to register user', 'details': str(e)}), 500
+    
 
 @auth.route('/login', methods=['POST'])
 def login():
