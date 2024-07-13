@@ -59,10 +59,13 @@ def save_user(username, email, password):
 
 @auth.route('/register', methods=['POST'])
 def register():
-    data = request.json
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
+    # data = request.json
+    # username = data.get('username')
+    # email = data.get('email')
+    # password = data.get('password')
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password')
     
     if not username or not email or not password:
         return jsonify({'error': 'Username, email, and password are required'}), 400
