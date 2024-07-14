@@ -4,12 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script>
+        function logout() {
+            fetch('/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                }
+            });
+        }
+    </script>
 </head>
 <body>
-    <h1>Template html server</h1>
+    
     <div>
-        <h1>Dashboard admin 1</h1>
+    <h1>Home dashboard 1</h1>
+    <h2>Dashboard admin 1</h2>
+    <button onclick="logout()">Logout</button>
     </div>
+
+
     
 </body>
 </html>
