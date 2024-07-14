@@ -1,5 +1,5 @@
 # src/auth/auth.py
-from flask import Blueprint, jsonify, request, make_response, render_template, session, current_app, redirect, url_for
+from flask import Blueprint, jsonify, request, make_response, render_template, session, session as flask_session, current_app, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 import jwt
 from datetime import datetime, timedelta
@@ -57,71 +57,72 @@ def save_user(username, email, password):
     finally:
         session.close()
 
-@auth.route('/register', methods=['POST'])
+@auth.route('/register', methods=['GET', 'POST'])
 def register():
-    data = request.json
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
-    
-    if not username or not email or not password:
-        return jsonify({'error': 'Username, email, and password are required'}), 400
-        
-    
-    try:
-        #checkear usuario existente
-        existing_user = get_user_by_username_or_email(username, email)
-        if existing_user:
-            return jsonify({'message': 'User or email already exists'}), 400
-        
-        user = save_user(username, email, password)
-        return jsonify({'message': 'User registered successfully', 'username': user.username, 'password':user.password}), 201
-    except ValueError as ve:
-        return jsonify({'error': str(ve)}), 400
-    except Exception as e:
-        return jsonify({'error': 'Failed to register user', 'details': str(e)}), 500
-    
-
-@auth.route('/login', methods=['POST'])
-def login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-
-    if not username or not password:
-        return jsonify({'error': 'Username and password are required'}), 400
-
-    # Buscar al usuario por nombre de usuario
-    session = SessionLocal()
-    try:
-        user = session.query(User).filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
-            token = jwt.encode({
-                'user': user.username,
-                'exp': datetime.utcnow() + timedelta(seconds=120)  # Expira en 2 minutos
-            }, current_app.config['SECRET_KEY'], algorithm="HS256")
-            session.close()
-            return jsonify({'token': token}), 200
-        else:
-            session.close()
-            return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm="Authentication Failed!"'})
-    except Exception as e:
-        session.close()
-        return jsonify({'error': 'Failed to authenticate', 'details': str(e)}), 500
-
-@auth.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    # return jsonify({'message': 'Successfully logged out'}), 200return redirect(url_for('auth.home'))
-
-    return redirect(url_for('auth.home'))
-
-
-@auth.route('/home')
-def home():
-    if not session.get('logged_in'):
+    if request.method == 'GET':
+        # Devolver el template 'login.html' que contiene ambos formularios
         return render_template('login.html')
+
+    elif request.method == 'POST':
+        # Procesar el formulario de registro
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        if not username or not email or not password:
+            return jsonify({'error': 'Nombre de usuario, correo electrónico y contraseña son obligatorios'}), 400
+
+        try:
+            # Verificar usuario existente
+            existing_user = get_user_by_username_or_email(username, email)
+            if existing_user:
+                return jsonify({'message': 'El usuario o correo electrónico ya existe'}), 400
+
+            user = save_user(username, email, password)
+            return jsonify({'message': 'Usuario registrado exitosamente', 'username': user.username}), 201
+        except ValueError as ve:
+            return jsonify({'error': str(ve)}), 400
+        except Exception as e:
+            return jsonify({'error': 'Error al registrar el usuario', 'detalles': str(e)}), 500
+
     else:
-        return 'Logged in currently!'
+        return jsonify({'error': 'Método no permitido'}), 405
+
+@auth.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if not username or not password:
+            return jsonify({'error': 'Username and password are required'}), 400
+
+        session = SessionLocal()
+        try:
+            user = session.query(User).filter_by(username=username).first()
+            if user and check_password_hash(user.password, password):
+                token = jwt.encode({
+                    'user': user.username,
+                    'exp': datetime.utcnow() + timedelta(seconds=120)
+                }, current_app.config['SECRET_KEY'], algorithm="HS256")
+                session.close()
+                
+                # Guardar el token en la sesión de Flask y redirigir al home
+                flask_session['token'] = token
+                return redirect(url_for('home.home'))  # Asegúrate de que 'home_admin.index' sea la ruta correcta
+            else:
+                session.close()
+                return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm="Authentication Failed!"'})
+        except Exception as e:
+            session.close()
+            return jsonify({'error': 'Failed to authenticate', 'details': str(e)}), 500
+    else:
+        return render_template('login.html')
+    
+@auth.route('/logout', methods=['POST'])
+def logout():
+    flask_session.pop('token', None)
+    return redirect(url_for('auth.login'))  # Redirige a la ruta de login
 
 @auth.route('/public')
 def public():
