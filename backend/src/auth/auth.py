@@ -12,6 +12,7 @@ from config_db import SessionLocal  # Importa la sesión de SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
+
 auth = Blueprint('auth', __name__)
 
 # Middleware para verificar el token
@@ -105,17 +106,14 @@ def login():
                     'user': user.username,
                     'exp': datetime.utcnow() + timedelta(seconds=120)
                 }, current_app.config['SECRET_KEY'], algorithm="HS256")
-                session.close()
-                
-                # Guardar el token en la sesión de Flask y redirigir al home
                 flask_session['token'] = token
-                return redirect(url_for('home.home'))  # Asegúrate de que 'home_admin.index' sea la ruta correcta
+                return jsonify({'token': token}), 200
             else:
-                session.close()
                 return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm="Authentication Failed!"'})
         except Exception as e:
-            session.close()
             return jsonify({'error': 'Failed to authenticate', 'details': str(e)}), 500
+        finally:
+            session.close()
     else:
         return render_template('login.html')
     
@@ -123,6 +121,17 @@ def login():
 def logout():
     flask_session.pop('token', None)
     return redirect(url_for('auth.login'))  # Redirige a la ruta de login
+
+#decorador para verificar tokens
+
+def login_decoration(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = session.get('token')
+        if token is None:
+            return redirect(url_for('auth.login', next = request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @auth.route('/public')
 def public():
