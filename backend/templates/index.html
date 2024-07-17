@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="admin.css">  </head>
+    <!-- script to close session(end) -->
     <script>
         function logout() {
             fetch('/auth/logout', {
@@ -21,13 +23,27 @@
 </head>
 <body>
     
-    <div>
+    <!-- <div>
     <h1>Home dashboard 1</h1>
     <h2>Dashboard admin 1</h2>
     <button onclick="logout()">Logout</button>
-    </div>
+    </div> -->
+    <header class="header">
+        <h1>Admin Dashboard</h1>
+        <button onclick="logout()">Logout</button>
+    </header>
 
+    <nav class="sidebar">
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Users</a></li>
+            </ul>
+    </nav>
 
-    
+    <main class="content">
+        <h2>Dashboard Content</h2>
+        </main>
+
 </body>
 </html>
