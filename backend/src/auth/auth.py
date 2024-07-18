@@ -101,15 +101,18 @@ def login():
         session = SessionLocal()
         try:
             user = session.query(User).filter_by(username=username).first()
-            if user and check_password_hash(user.password, password):
-                token = jwt.encode({
-                    'user': user.username,
-                    'exp': datetime.utcnow() + timedelta(seconds=120)
-                }, current_app.config['SECRET_KEY'], algorithm="HS256")
-                flask_session['token'] = token
-                return jsonify({'token': token}), 200
+            if user:
+                if check_password_hash(user.password, password):
+                    token = jwt.encode({
+                        'user': user.username,
+                        'exp': datetime.utcnow() + timedelta(seconds=120)
+                    }, current_app.config['SECRET_KEY'], algorithm="HS256")
+                    flask_session['token'] = token
+                    return jsonify({'token': token}), 200
+                else:
+                    return jsonify({'error': 'Incorrect username or password'}), 403
             else:
-                return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm="Authentication Failed!"'})
+                return jsonify({'error': 'User not found, please register first'}), 404
         except Exception as e:
             return jsonify({'error': 'Failed to authenticate', 'details': str(e)}), 500
         finally:
