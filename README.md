@@ -6,7 +6,7 @@ This project is a login system developed with **Python** and **Flask**, utilizin
 
 - **User Registration**: Allows new users to create an account.
 - **Login**: Authenticate users and generate JWT tokens.
-- **Password Hashing**: Ensures passwords are securely hashed before storage.
+- **Password Hashing**: Ensures passwords are securely hashed.
 - **Error Handling**: Provides appropriate error messages for various authentication issues.
 - **Redirections**: Manages user redirections post-login and logout.
 
