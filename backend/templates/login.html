@@ -4,23 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
 </head>
 <body>
-    <form action="/auth/register" method="POST">
-
-        <input type="username" name="username" placeholder="username"> <br><br>
-        <input type="password" name="password" placeholder="password"> <br><br>
-        <input type="email" name="email" placeholder="email"> <br><br>
-        <input type="submit" value="Register">
-   
-       </form><br/><br/>
-    <form action="/auth/login" method="POST">
-
-     <input type="username" name="username" placeholder="username"> <br><br>
-     <input type="password" name="password" placeholder="password"> <br><br>
-     <input type="submit" value="Login">
-
-    </form>
-
+    <div class="form-container">
+        <h1 class="h1">Welcome</h1>
+        <form action="/auth/register" method="POST" class="form">
+            <input type="text" name="username" placeholder="username" class="inputs"> <br><br>
+            <input type="password" name="password" placeholder="password" class="inputs"> <br><br>
+            <input type="email" name="email" placeholder="email" class="inputs"> <br><br>
+            <input type="submit" value="Register" class="boton">
+            <hr style="border: none; border-top: 1px dotted rgb(79, 91, 103); margin: 20px 0;">
+        </form><br/><br/>
+        
+        <form action="/auth/login" method="POST" class="form">
+            <input type="text" name="username" placeholder="username" class="inputs"> <br><br>
+            <input type="password" name="password" placeholder="password" class="inputs"> <br><br>
+            <input type="submit" value="Login" class="boton">
+        </form>
+    </div>
 </body>
 </html>

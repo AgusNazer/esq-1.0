@@ -108,7 +108,8 @@ def login():
                         'exp': datetime.utcnow() + timedelta(seconds=120)
                     }, current_app.config['SECRET_KEY'], algorithm="HS256")
                     flask_session['token'] = token
-                    return jsonify({'token': token}), 200
+                    # return jsonify({'token': token, 'redirect': True}), 200
+                    return redirect(url_for('home.home'))
                 else:
                     return jsonify({'error': 'Incorrect username or password'}), 403
             else:
